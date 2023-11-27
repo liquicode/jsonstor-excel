@@ -1,7 +1,7 @@
-# jsonstor-mongodb
-[`@liquiode/jsonstor-mongodb`](https://github.com/liquicode/jsonstor-mongodb)
+# jsonstor-excel
+[`@liquiode/jsonstor-excel`](https://github.com/liquicode/jsonstor-excel)
 
-### A jsonstor adapter which stores documents on a MongoDB server.
+### A jsonstor adapter which stores documents in an Excel spreadsheet.
 
 
 Overview

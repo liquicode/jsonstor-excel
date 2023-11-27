@@ -1,19 +1,18 @@
 'use strict';
 
 const LIB_FS = require( 'fs' );
-
-const XLSX = require( 'xlsx' );
+const LIB_PATH = require( 'path' );
 
 const jsongin = require( '@liquicode/jsongin' )();
-const StorageBase = require( '../StorageBase' );
-const MemoryStorage = require( './jsonstor-memory' );
+const XLSX = require( 'xlsx' );
+
 
 module.exports = {
 
 	AdapterName: 'jsonstor-excel',
 	AdapterDescription: 'Documents are stored in an Excel spreadsheet file.',
 
-	GetAdapter: function ( Settings )
+	GetAdapter: function ( jsonstor, Settings )
 	{
 
 
@@ -38,9 +37,103 @@ module.exports = {
 
 
 		//=====================================================================
-		let Storage = StorageBase( this, Settings );
-		Storage.MemoryStorage = MemoryStorage.GetAdapter( Settings );
+		let Storage = jsonstor.StorageInterface();
+		Storage.Settings = jsongin.SafeClone( Settings );
+		Storage.MemoryStorage = jsonstor.GetStorage( 'jsonstor-memory', Settings );
 		read_storage();
+
+
+		// //=====================================================================
+		// function simplify( Document )
+		// {
+		// 	let simple = {};
+		// 	for ( let key in Document )
+		// 	{
+		// 		switch ( jsongin.ShortType( Document[ key ] ) )
+		// 		{
+		// 			case 'b':
+		// 			case 'n':
+		// 			case 's':
+		// 			case 'l':
+		// 				simple[ key ] = Document[ key ];
+		// 				break;
+		// 			case 'o':
+		// 				simple[ key ] = JSON.stringify( { type: 'o', value: Document[ key ] } );
+		// 				break;
+		// 			case 'a':
+		// 				simple[ key ] = JSON.stringify( { type: 'a', value: Document[ key ] } );
+		// 				break;
+		// 			case 'r':
+		// 				simple[ key ] = JSON.stringify( { type: 'r', flags: Document[ key ].flags, source: Document[ key ].source } );
+		// 				break;
+		// 			case 'e':
+		// 				simple[ key ] = JSON.stringify( { type: 'e', message: Document[ key ].message } );
+		// 				break;
+		// 			case 'f':
+		// 				simple[ key ] = JSON.stringify( { type: 'f', source: Document[ key ].toString() } );
+		// 				break;
+		// 			case 'y':
+		// 				simple[ key ] = JSON.stringify( { type: 'y', source: Document[ key ].toString() } );
+		// 				break;
+		// 			case 'u':
+		// 				simple[ key ] = JSON.stringify( { type: 'u' } );
+		// 				break;
+		// 		}
+		// 	}
+		// 	return simple;
+		// }
+
+
+		// //=====================================================================
+		// function complicate( Document )
+		// {
+		// 	let complicated = {};
+		// 	for ( let key in Document )
+		// 	{
+		// 		switch ( jsongin.ShortType( Document[ key ] ) )
+		// 		{
+		// 			case 'b':
+		// 			case 'n':
+		// 			case 'l':
+		// 				complicated[ key ] = Document[ key ];
+		// 				break;
+		// 			case 's':
+		// 				try
+		// 				{
+		// 					let value = JSON.parse( Document[ key ] );
+		// 					switch ( value.type )
+		// 					{
+		// 						case 'o':
+		// 							complicated[ key ] = value.value;
+		// 							break;
+		// 						case 'a':
+		// 							complicated[ key ] = value.value;
+		// 							break;
+		// 						case 'r':
+		// 							complicated[ key ] = new RegExp( value.source, value.flags );
+		// 							break;
+		// 						case 'e':
+		// 							complicated[ key ] = new Error( Document[ key ].message );
+		// 							break;
+		// 						case 'f':
+		// 							complicated[ key ] = new Function( Document[ key ].source );
+		// 							break;
+		// 						case 'y':
+		// 							complicated[ key ] = Symbol( Document[ key ].source );
+		// 							break;
+		// 						case 'u':
+		// 							complicated[ key ] = undefined;
+		// 							break;
+		// 					}
+		// 					break;
+		// 				}
+		// 				catch ( error ) { }
+		// 				complicated[ key ] = Document[ key ];
+		// 				break;
+		// 		}
+		// 	}
+		// 	return complicated;
+		// }
 
 
 		//=====================================================================
@@ -51,7 +144,12 @@ module.exports = {
 			let workbook = XLSX.readFile( Settings.Path );
 			if ( !workbook.SheetNames.includes( Settings.SheetName ) ) { return; }
 			let worksheet = workbook.Sheets[ Settings.SheetName ];
-			Storage.MemoryStorage.store = XLSX.utils.sheet_to_json( worksheet, {} );
+			let values = XLSX.utils.sheet_to_json( worksheet, {} );
+			for ( let index = 0; index < values.length; index++ )
+			{
+				values[ index ] = jsongin.Unhybridize( values[ index ] );
+			}
+			Storage.MemoryStorage.store = values;
 			return;
 		}
 
@@ -59,6 +157,11 @@ module.exports = {
 		//=====================================================================
 		function write_storage()
 		{
+			let dirname = LIB_PATH.dirname( Settings.Path );
+			if ( !LIB_FS.existsSync( dirname ) )
+			{
+				LIB_FS.mkdirSync( dirname, { recursive: true } );
+			}
 			let workbook = null;
 			if ( !LIB_FS.existsSync( Settings.Path ) )
 			{
@@ -68,7 +171,12 @@ module.exports = {
 			{
 				workbook = XLSX.readFile( Settings.Path );
 			}
-			let worksheet = XLSX.utils.json_to_sheet( Storage.MemoryStorage.store, {} );
+			let values = jsongin.SafeClone( Storage.MemoryStorage.store );
+			for ( let index = 0; index < values.length; index++ )
+			{
+				values[ index ] = jsongin.Hybridize( values[ index ] );
+			}
+			let worksheet = XLSX.utils.json_to_sheet( values, {} );
 			if ( !workbook.SheetNames.includes( Settings.SheetName ) )
 			{
 				XLSX.utils.book_append_sheet( workbook, worksheet, Settings.SheetName, false );
