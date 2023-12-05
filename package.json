@@ -1,6 +1,6 @@
 {
 	"name": "@liquicode/jsonstor-excel",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "A jsonstor adapter which stores documents in an Excel worksheet or CSV file.",
 	"license": "MIT",
 	"homepage": "http://jsonstor.liquicode.com",
