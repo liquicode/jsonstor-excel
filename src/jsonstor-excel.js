@@ -3,7 +3,7 @@
 const LIB_FS = require( 'fs' );
 const LIB_PATH = require( 'path' );
 
-const jsongin = require( '@liquicode/jsongin' )();
+const jsongin = require( '@liquicode/jsongin' );
 const XLSX = require( 'xlsx' );
 
 
@@ -230,6 +230,18 @@ module.exports = {
 		Storage.FindMany = async function FindMany( Criteria, Projection, Options ) 
 		{
 			let results = await Storage.MemoryStorage.FindMany( Criteria, Projection, Options );
+			return results;
+		};
+
+
+		//=====================================================================
+		// FindMany2
+		//=====================================================================
+
+
+		Storage.FindMany2 = async function FindMany2( Criteria, Projection, Sort, MaxCount, Options ) 
+		{
+			let results = await Storage.MemoryStorage.FindMany2( Criteria, Projection, Sort, MaxCount, Options );
 			return results;
 		};
 

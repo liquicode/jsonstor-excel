@@ -1,6 +1,6 @@
 {
 	"name": "@liquicode/jsonstor-excel",
-	"version": "0.0.2",
+	"version": "0.0.20",
 	"description": "A jsonstor adapter which stores documents in an Excel worksheet or CSV file.",
 	"license": "MIT",
 	"homepage": "http://jsonstor.liquicode.com",
@@ -28,14 +28,15 @@
 		"mongo query"
 	],
 	"devDependencies": {
+		"@liquicode/devops": "^0.0.20",
 		"mocha": "^10.2.0",
 		"webpack": "^5.89.0",
 		"webpack-cli": "^5.1.4",
 		"webpack-node-externals": "^3.0.0"
 	},
 	"dependencies": {
-		"@liquicode/jsongin": "",
-		"@liquicode/jsonstor": "",
+		"@liquicode/jsongin": "^0.0.20",
+		"@liquicode/jsonstor": "^0.0.20",
 		"xlsx": "^0.18.5"
 	}
 }
