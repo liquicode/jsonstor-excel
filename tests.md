@@ -1,18 +1,27 @@
+# @liquicode/jsonstor-excel
+
+> Documents are stored in an Excel spreadsheet file.
+
+# Test Results
+
 ```
+> @liquicode/jsonstor-excel@0.0.22 test
+> mocha -u bdd test/*.js --timeout 0 --slow 10 --colors
+
 
 
   jsonstor-excel Tests
     A) CRUD Tests
-      ✔ should insert 100 documents, one at a time (847ms)
-      ✔ should delete 100 documents, all at once (7ms)
+      ✔ should insert 100 documents, one at a time (1477ms)
+      ✔ should delete 100 documents, all at once (13ms)
       ✔ should insert 100 documents, all at once
-      ✔ should read 100 documents, one at a time (20ms)
-      ✔ should replace 100 documents, one at a time (1023ms)
+      ✔ should read 100 documents, one at a time (19ms)
+      ✔ should replace 100 documents, one at a time (1646ms)
       ✔ should read 100 documents, all at once
       ✔ should read 5 documents, all at once and sorted
-      ✔ should update 100 documents, one at a time (1070ms)
-      ✔ should update 100 documents, all at once (11ms)
-      ✔ should delete 100 documents, one at a time (865ms)
+      ✔ should update 100 documents, one at a time (1668ms)
+      ✔ should update 100 documents, all at once (15ms)
+      ✔ should delete 100 documents, one at a time (1340ms)
     B) Rainbow Tests
       Nested Fields (explicit)
         ✔ should not perform matching on nested fields using implicit $eq
@@ -51,13 +60,23 @@
         ✔ should not perform loose comparison (<) on 'bns'
     C) UserInfo Permissions Tests
       Alice, Bob, and Eve scenario
-        ✔ Should add documents and set permissions (66ms)
-        ✔ Alice should read all documents and write all documents (99ms)
-        ✔ Bob should read some documents and write some documents (81ms)
-        ✔ Eve should read some documents and write some documents (67ms)
-        ✔ Public objects should be readable by everyone (67ms)
-        ✔ Public objects should only be writable by the owner (68ms)
-        ✔ Should not allow readers to update documents (67ms)
+        ✔ Should add documents and set permissions (115ms)
+        ✔ Alice should read all documents and write all documents (177ms)
+        ✔ Bob should read some documents and write some documents (143ms)
+        ✔ Eve should read some documents and write some documents (119ms)
+        ✔ Public objects should be readable by everyone (118ms)
+        ✔ Public objects should only be writable by the owner (116ms)
+        ✔ Should not allow readers to update documents (116ms)
+    D) Engine Contract Tests
+      ✔ should refuse a criteria naming an unknown operator
+      ✔ should refuse a criteria which is not an object
+      ✔ should refuse an update naming an unknown operator
+      ✔ should refuse an update which cannot be applied
+      ✔ should not alias a FindOne result to the stored document (10ms)
+      ✔ should not alias a FindMany result to the stored documents (13ms)
+      ✔ should sort a missing field and a null below every value (13ms)
+      ✔ should reverse that order when sorting descending
+      ✔ should limit the result to MaxCount after sorting
     M) MongoDB Tutorial
       Query Documents (https://www.mongodb.com/docs/manual/tutorial/query-documents/)
         Select All Documents in a Collection
@@ -151,30 +170,29 @@
           ✔ Nested $or Clauses
       Element Query Operators
         Element Query Operator: $exists (https://www.mongodb.com/docs/manual/reference/operator/query/exists/)
-          ✔ Exists and Not Equal To
-          ✔ Null Values (8ms)
+          ✔ Exists and Not Equal To (11ms)
+          ✔ Null Values (12ms)
         Element Query Operator: $type (https://www.mongodb.com/docs/manual/reference/operator/query/type/)
           ✔ Querying by Data Type (BSON Code)
           ✔ Querying by Data Type (BSON Alias)
           ✔ Querying by Data Type ("number")
-          ✔ Querying by Multiple Data Type (BSON Code)
-          ✔ Querying by Multiple Data Type (BSON Alias)
+          ✔ Querying by Multiple Data Type (BSON Code) (12ms)
+          ✔ Querying by Multiple Data Type (BSON Alias) (12ms)
       Array Query Operators
         Array Query Operator: $all (https://www.mongodb.com/docs/manual/reference/operator/query/all/)
           ✔ Use $all to Match Values
           ✔ Use $all with $elemMatch
           ✔ Use $all with Scalar Values
         Array Query Operator: $elemMatch (https://www.mongodb.com/docs/manual/reference/operator/query/elemMatch/)
-          ✔ Element Match (8ms)
+          ✔ Element Match (12ms)
           ✔ Array of Embedded Documents
           ✔ Single Query Condition
         Array Query Operator: $size (https://www.mongodb.com/docs/manual/reference/operator/query/size/)
-          ✔ Use $size to Match Array Sizes
+          ✔ Use $size to Match Array Sizes (6ms)
     Z) Ad-Hoc Tests
       ✔ should not match explicit nested fields
-      ✔ should sort and limit in FindMany2 (66ms)
+      ✔ should sort and limit in FindMany2 (106ms)
 
 
-  111 passing (5s)
-
+  120 passing (8s)
 ```
