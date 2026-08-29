@@ -9,9 +9,9 @@ Every test in this family lives in [`@liquicode/jsonstor-docs`](https://github.c
 
 ## Engine Tests
 
-| Engine         |            A |          B |           C |          D |          M |           N |           Z |             Total |
-|----------------|-------------:|-----------:|------------:|-----------:|-----------:|------------:|------------:|------------------:|
-| jsonstor-excel | 10/0 (5.84s) | 27/0 (0ms) | 7/0 (942ms) | 9/0 (38ms) | 26/0 (1ms) | 39/0 (74ms) | 2/0 (103ms) | **120/0** (7.00s) |
+| Engine         |            A |          B |           C |          D |           E |          M |           N |           Z |              Total |
+|----------------|-------------:|-----------:|------------:|-----------:|------------:|-----------:|------------:|------------:|-------------------:|
+| jsonstor-excel | 10/0 (8.35s) | 27/0 (1ms) | 7/0 (1.48s) | 9/0 (53ms) | 6/0 (111ms) | 26/0 (1ms) | 39/0 (73ms) | 2/0 (284ms) | **126/0** (10.36s) |
 
 Each cell is ***passing/failing (duration)***.
 
@@ -21,6 +21,7 @@ Each cell is ***passing/failing (duration)***.
 | B      | Rainbow Query Tests        |
 | C      | UserInfo Permissions Tests |
 | D      | Engine Contract Tests      |
+| E      | Extension Operator Tests   |
 | M      | MongoDB Tutorial           |
 | N      | MongoDB Reference          |
 | Z      | Ad-Hoc Tests               |
