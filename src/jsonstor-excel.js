@@ -117,7 +117,20 @@ module.exports = {
 		//=====================================================================
 
 
-		Storage.DropStorage = async function ( Options ) 
+		// ***What this storage is actually talking to.*** An in-process adapter reports the
+		// version of whatever implements it, which here is the workbook library rather than a
+		// server. Uniform, so no caller has to special-case an adapter which cannot answer.
+		Storage.StorageInfo = async function ( Options )
+		{
+			return jsonstor.BuildStorageInfo( Storage, {
+				Product: 'xlsx',
+				Version: XLSX.version || '',
+				InProcess: true,
+			} );
+		};
+
+
+		Storage.DropStorage = async function ( Options )
 		{
 			return new Promise(
 				async ( resolve, reject ) =>
