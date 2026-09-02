@@ -11,7 +11,7 @@ Every test in this family lives in [`@liquicode/jsonstor-docs`](https://github.c
 
 | Engine         |            A |          B |           C |           D |          E |         F |          M |           N |          Z |             Total |
 |----------------|-------------:|-----------:|------------:|------------:|-----------:|----------:|-----------:|------------:|-----------:|------------------:|
-| jsonstor-excel | 10/0 (4.82s) | 27/0 (1ms) | 7/0 (768ms) | 14/0 (44ms) | 6/0 (32ms) | 3/0 (1ms) | 26/0 (0ms) | 39/0 (53ms) | 2/0 (91ms) | **134/0** (5.80s) |
+| jsonstor-excel | 10/0 (4.72s) | 27/0 (1ms) | 7/0 (741ms) | 14/0 (34ms) | 6/0 (31ms) | 3/0 (0ms) | 26/0 (0ms) | 39/0 (52ms) | 2/0 (90ms) | **134/0** (5.67s) |
 
 Each cell is ***passing/failing (duration)***.
 
