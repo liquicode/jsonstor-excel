@@ -40,13 +40,30 @@ module.exports = {
 		let Storage = jsonstor.StorageInterface();
 		Storage.Settings = jsongin.SafeClone( Settings );
 		Storage.MemoryStorage = jsonstor.GetStorage( 'jsonstor-memory', Settings );
+		// ***The key is the memory storage's, because the memory storage is where it is
+		// enforced.*** This adapter forwards every document function to it and persists what
+		// comes back, so a second resolution here would be a second description of one fact.
+		Storage.PrimaryKeyInfo = Storage.MemoryStorage.PrimaryKeyInfo;
 		read_storage();
 
 
 		//=====================================================================
+		// ***Every read of the workbook rebuilds the index***, because the read replaces the
+		// whole store rather than adding to it. An index left over from the previous contents
+		// does not return wrong rows, it ***loses them silently***. The read itself keeps its
+		// early returns, which is why it is a function of its own rather than a body to append to.
 		function read_storage()
 		{
-			Storage.MemoryStorage.store = [];
+			read_workbook();
+			Storage.MemoryStorage.RebuildIndex();
+			return;
+		}
+
+
+		//=====================================================================
+		function read_workbook()
+		{
+			Storage.MemoryStorage.Store = [];
 			if ( !LIB_FS.existsSync( Settings.Path ) ) { return; }
 			let workbook = XLSX.readFile( Settings.Path );
 			if ( !workbook.SheetNames.includes( Settings.SheetName ) ) { return; }
@@ -56,7 +73,7 @@ module.exports = {
 			{
 				values[ index ] = jsongin.Unhybridize( values[ index ] );
 			}
-			Storage.MemoryStorage.store = values;
+			Storage.MemoryStorage.Store = values;
 			return;
 		}
 
@@ -78,7 +95,7 @@ module.exports = {
 			{
 				workbook = XLSX.readFile( Settings.Path );
 			}
-			let values = jsongin.SafeClone( Storage.MemoryStorage.store );
+			let values = jsongin.SafeClone( Storage.MemoryStorage.Store );
 			for ( let index = 0; index < values.length; index++ )
 			{
 				values[ index ] = jsongin.Hybridize( values[ index ] );
@@ -100,7 +117,8 @@ module.exports = {
 		//=====================================================================
 		function drop_storage()
 		{
-			Storage.MemoryStorage.store = [];
+			Storage.MemoryStorage.Store = [];
+			Storage.MemoryStorage.RebuildIndex();
 			if ( !LIB_FS.existsSync( Settings.Path ) ) { return; }
 			let workbook = XLSX.readFile( Settings.Path );
 			if ( !workbook.SheetNames.includes( Settings.SheetName ) ) { return; }
@@ -130,10 +148,28 @@ module.exports = {
 		};
 
 
+		//=====================================================================
+		// RefreshIndex
+		//=====================================================================
+
+
+		// ***Re-reads the workbook and rebuilds the index from what is in it.***
+		//
+		// ***This adapter caches the whole collection, so a foreign write makes the documents
+		// stale and not only the index*** - and a spreadsheet somebody else edits is the case
+		// this adapter exists for. Refreshing an index without re-reading the file would rebuild
+		// it over contents which are equally out of date, and report success.
+		Storage.RefreshIndex = async function ( Options )
+		{
+			read_storage();
+			return await Storage.MemoryStorage.RefreshIndex( Options );
+		};
+
+
 		Storage.DropStorage = async function ( Options )
 		{
 			return new Promise(
-				async ( resolve, reject ) =>
+				async function ( resolve, reject )
 				{
 					try
 					{
@@ -159,7 +195,7 @@ module.exports = {
 		Storage.FlushStorage = async function ( Options ) 
 		{
 			return new Promise(
-				async ( resolve, reject ) =>
+				async function ( resolve, reject )
 				{
 					try
 					{
@@ -197,10 +233,10 @@ module.exports = {
 		Storage.InsertOne = async function ( Document, Options ) 
 		{
 			let results = await Storage.MemoryStorage.InsertOne( Document, Options );
-			if ( Storage.MemoryStorage.is_dirty )
+			if ( Storage.MemoryStorage.IsDirty )
 			{
 				if ( Settings.AutoFlush ) { write_storage(); }
-				Storage.MemoryStorage.is_dirty = false;
+				Storage.MemoryStorage.IsDirty = false;
 			}
 			return results;
 		};
@@ -214,10 +250,10 @@ module.exports = {
 		Storage.InsertMany = async function ( Documents, Options ) 
 		{
 			let results = await Storage.MemoryStorage.InsertMany( Documents, Options );
-			if ( Storage.MemoryStorage.is_dirty )
+			if ( Storage.MemoryStorage.IsDirty )
 			{
 				if ( Settings.AutoFlush ) { write_storage(); }
-				Storage.MemoryStorage.is_dirty = false;
+				Storage.MemoryStorage.IsDirty = false;
 			}
 			return results;
 		};
@@ -267,10 +303,10 @@ module.exports = {
 		Storage.UpdateOne = async function UpdateOne( Criteria, Update, Options ) 
 		{
 			let results = await Storage.MemoryStorage.UpdateOne( Criteria, Update, Options );
-			if ( Storage.MemoryStorage.is_dirty )
+			if ( Storage.MemoryStorage.IsDirty )
 			{
 				if ( Settings.AutoFlush ) { write_storage(); }
-				Storage.MemoryStorage.is_dirty = false;
+				Storage.MemoryStorage.IsDirty = false;
 			}
 			return results;
 		};
@@ -284,10 +320,10 @@ module.exports = {
 		Storage.UpdateMany = async function UpdateMany( Criteria, Update, Options ) 
 		{
 			let results = await Storage.MemoryStorage.UpdateMany( Criteria, Update, Options );
-			if ( Storage.MemoryStorage.is_dirty )
+			if ( Storage.MemoryStorage.IsDirty )
 			{
 				if ( Settings.AutoFlush ) { write_storage(); }
-				Storage.MemoryStorage.is_dirty = false;
+				Storage.MemoryStorage.IsDirty = false;
 			}
 			return results;
 		};
@@ -301,10 +337,10 @@ module.exports = {
 		Storage.ReplaceOne = async function ReplaceOne( Criteria, Document, Options ) 
 		{
 			let results = await Storage.MemoryStorage.ReplaceOne( Criteria, Document, Options );
-			if ( Storage.MemoryStorage.is_dirty )
+			if ( Storage.MemoryStorage.IsDirty )
 			{
 				if ( Settings.AutoFlush ) { write_storage(); }
-				Storage.MemoryStorage.is_dirty = false;
+				Storage.MemoryStorage.IsDirty = false;
 			}
 			return results;
 		};
@@ -318,10 +354,10 @@ module.exports = {
 		Storage.DeleteOne = async function DeleteOne( Criteria, Options ) 
 		{
 			let results = await Storage.MemoryStorage.DeleteOne( Criteria, Options );
-			if ( Storage.MemoryStorage.is_dirty )
+			if ( Storage.MemoryStorage.IsDirty )
 			{
 				if ( Settings.AutoFlush ) { write_storage(); }
-				Storage.MemoryStorage.is_dirty = false;
+				Storage.MemoryStorage.IsDirty = false;
 			}
 			return results;
 		};
@@ -335,10 +371,10 @@ module.exports = {
 		Storage.DeleteMany = async function DeleteMany( Criteria, Options ) 
 		{
 			let results = await Storage.MemoryStorage.DeleteMany( Criteria, Options );
-			if ( Storage.MemoryStorage.is_dirty )
+			if ( Storage.MemoryStorage.IsDirty )
 			{
 				if ( Settings.AutoFlush ) { write_storage(); }
-				Storage.MemoryStorage.is_dirty = false;
+				Storage.MemoryStorage.IsDirty = false;
 			}
 			return results;
 		};

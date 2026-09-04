@@ -42,6 +42,9 @@ let storage = jsonstor.GetStorage( 'jsonstor-excel', {
 	HeaderRow: 0,
 	DataRow: 1,
 	DataCol: 0,
+	PrimaryKey: "_id",
+	PrimaryKeyMutable: false,
+	HostIndex: false,
 } );
 ```
 
@@ -56,6 +59,9 @@ Settings
 | `HeaderRow` | No | `0` | The row index of the header row, which names the document fields. |
 | `DataRow` | No | `1` | The row index the data starts on. |
 | `DataCol` | No | `0` | The column index the data starts on. |
+| `PrimaryKey` | No | `"_id"` | The document field which is the identifier. Name the field an existing store is already keyed on to read one. |
+| `PrimaryKeyMutable` | No | `false` | Allow an update or a replacement to change the identifier. Off by default, so an operation which would move it is refused by name rather than silently discarded. |
+| `HostIndex` | No | `false` | Hold an index over the identifier, so a lookup by it costs one entry rather than the whole collection. Off by default, because an index over a store something else writes goes stale - call `RefreshIndex()` when it might have. |
 
 Peculiarities
 ---------------------------------------------------------------------

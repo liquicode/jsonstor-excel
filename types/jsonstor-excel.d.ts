@@ -25,6 +25,12 @@ declare module '@liquicode/jsonstor-excel'
 		DataRow?: number;
 		/** The column index the data starts on. Defaults to `0`. */
 		DataCol?: number;
+		/** The document field which is the identifier. Name the field an existing store is already keyed on to read one. Defaults to `"_id"`. */
+		PrimaryKey?: string;
+		/** Allow an update or a replacement to change the identifier. Off by default, so an operation which would move it is refused by name rather than silently discarded. Defaults to `false`. */
+		PrimaryKeyMutable?: boolean;
+		/** Hold an index over the identifier, so a lookup by it costs one entry rather than the whole collection. Off by default, because an index over a store something else writes goes stale - call `RefreshIndex()` when it might have. Defaults to `false`. */
+		HostIndex?: boolean;
 	}
 
 
