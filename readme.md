@@ -39,9 +39,6 @@ let storage = jsonstor.GetStorage( 'jsonstor-excel', {
 	Path: '...',
 	SheetName: '...',
 	AutoFlush: true,
-	HeaderRow: 0,
-	DataRow: 1,
-	DataCol: 0,
 	PrimaryKey: "_id",
 	PrimaryKeyMutable: false,
 	HostIndex: false,
@@ -56,9 +53,6 @@ Settings
 | `Path` | ***Yes*** | - | Path to the Excel or CSV file storing the data. |
 | `SheetName` | ***Yes*** | - | The name of the worksheet storing the data. |
 | `AutoFlush` | No | `true` | Write the workbook on every insert, update, replace, and delete. |
-| `HeaderRow` | No | `0` | The row index of the header row, which names the document fields. |
-| `DataRow` | No | `1` | The row index the data starts on. |
-| `DataCol` | No | `0` | The column index the data starts on. |
 | `PrimaryKey` | No | `"_id"` | The document field which is the identifier. Name the field an existing store is already keyed on to read one. |
 | `PrimaryKeyMutable` | No | `false` | Allow an update or a replacement to change the identifier. Off by default, so an operation which would move it is refused by name rather than silently discarded. |
 | `HostIndex` | No | `false` | Hold an index over the identifier, so a lookup by it costs one entry rather than the whole collection. Off by default, because an index over a store something else writes goes stale - call `RefreshIndex()` when it might have. |
@@ -70,6 +64,8 @@ Peculiarities
 - ***The whole workbook is read into memory and rewritten on flush***, the same way `jsonstor-jsonfile` treats its file. Queries run against the memory copy.
 - `AutoFlush: false` means nothing reaches the file until `FlushStorage()` is called.
 - ***A spreadsheet has no notion of a nested object.*** A field holding an object or an array is stored as JSON text in the cell, and comes back parsed. Field order within a restored object is not guaranteed, so a strict equality comparison against a whole object may fail.
+- ***A field holding `null` reads back absent.*** A spreadsheet cell holding nothing and a cell which was never written are the same cell, so the distinction cannot survive the file. Every other adapter but the columns-only SQL configurations keeps it.
+- ***The first row of the worksheet is the header row, always.*** The data starts on the second row and in the first column. Nothing configures that.
 - This adapter is the way to hand a collection to somebody who wants to open it in Excel, which is the reason it exists.
 
 Storage Interface

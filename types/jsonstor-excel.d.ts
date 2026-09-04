@@ -19,12 +19,6 @@ declare module '@liquicode/jsonstor-excel'
 		SheetName: string;
 		/** Write the workbook on every insert, update, replace, and delete. Defaults to `true`. */
 		AutoFlush?: boolean;
-		/** The row index of the header row, which names the document fields. Defaults to `0`. */
-		HeaderRow?: number;
-		/** The row index the data starts on. Defaults to `1`. */
-		DataRow?: number;
-		/** The column index the data starts on. Defaults to `0`. */
-		DataCol?: number;
 		/** The document field which is the identifier. Name the field an existing store is already keyed on to read one. Defaults to `"_id"`. */
 		PrimaryKey?: string;
 		/** Allow an update or a replacement to change the identifier. Off by default, so an operation which would move it is refused by name rather than silently discarded. Defaults to `false`. */
