@@ -127,6 +127,14 @@ module.exports = {
 			// `splice( 1 )` - so dropping one sheet deleted every sheet after the first (2026-09-13).
 			workbook.SheetNames.splice( index, 1 );
 			delete workbook.Sheets[ Settings.SheetName ];
+			// ***A workbook cannot hold no sheets*** - writing one throws "Workbook is empty" - so
+			// dropping the last sheet deletes the file, which leaves the storage exactly as absent
+			// as a path which never existed (user decision, 2026-09-13).
+			if ( workbook.SheetNames.length === 0 )
+			{
+				LIB_FS.unlinkSync( Settings.Path );
+				return;
+			}
 			XLSX.writeFile( workbook, Settings.Path );
 			return;
 		}
