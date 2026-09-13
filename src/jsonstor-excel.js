@@ -123,7 +123,9 @@ module.exports = {
 			let workbook = XLSX.readFile( Settings.Path );
 			if ( !workbook.SheetNames.includes( Settings.SheetName ) ) { return; }
 			let index = workbook.SheetNames.indexOf( Settings.SheetName );
-			workbook.SheetNames.splice( ( index, 1 ) );
+			// ***Two arguments.*** This read `splice( ( index, 1 ) )`, which the comma operator makes
+			// `splice( 1 )` - so dropping one sheet deleted every sheet after the first (2026-09-13).
+			workbook.SheetNames.splice( index, 1 );
 			delete workbook.Sheets[ Settings.SheetName ];
 			XLSX.writeFile( workbook, Settings.Path );
 			return;

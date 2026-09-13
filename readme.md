@@ -53,20 +53,19 @@ Settings
 | `Path` | ***Yes*** | - | Path to the Excel or CSV file storing the data. |
 | `SheetName` | ***Yes*** | - | The name of the worksheet storing the data. |
 | `AutoFlush` | No | `true` | Write the workbook on every insert, update, replace, and delete. |
-| `PrimaryKey` | No | `"_id"` | The document field which is the identifier. Name the field an existing store is already keyed on to read one. |
-| `PrimaryKeyMutable` | No | `false` | Allow an update or a replacement to change the identifier. Off by default, so an operation which would move it is refused by name rather than silently discarded. |
-| `HostIndex` | No | `false` | Hold an index over the identifier, so a lookup by it costs one entry rather than the whole collection. Off by default, because an index over a store something else writes goes stale - call `RefreshIndex()` when it might have. |
+| `PrimaryKey` | No | `"_id"` | The field which holds the identifier. Set it to the key field of an existing store. |
+| `PrimaryKeyMutable` | No | `false` | Allow an update or replacement to change the identifier. When `false`, such an operation is refused. |
+| `HostIndex` | No | `false` | Keep an index of identifiers, so a search by identifier does not read the whole collection. If something else writes the store, call `RefreshIndex()`. |
 
 Peculiarities
 ---------------------------------------------------------------------
 
-- ***A worksheet is a table, and a document is a row.*** The header row names the fields, so the shape of a document is fixed by the sheet rather than by the document.
-- ***The whole workbook is read into memory and rewritten on flush***, the same way `jsonstor-jsonfile` treats its file. Queries run against the memory copy.
-- `AutoFlush: false` means nothing reaches the file until `FlushStorage()` is called.
-- ***A spreadsheet has no notion of a nested object.*** A field holding an object or an array is stored as JSON text in the cell, and comes back parsed. Field order within a restored object is not guaranteed, so a strict equality comparison against a whole object may fail.
-- ***A field holding `null` reads back absent.*** A spreadsheet cell holding nothing and a cell which was never written are the same cell, so the distinction cannot survive the file. Every other adapter but the columns-only SQL configurations keeps it.
-- ***The first row of the worksheet is the header row, always.*** The data starts on the second row and in the first column. Nothing configures that.
-- This adapter is the way to hand a collection to somebody who wants to open it in Excel, which is the reason it exists.
+- ***A document is a row.*** The first row of the worksheet holds the field names, and each document is a row below it. A field no earlier document had adds a column.
+- ***The whole worksheet is kept in memory***, as in `jsonstor-jsonfile`, and the workbook is rewritten on each write, or on `FlushStorage()` with `AutoFlush: false`.
+- ***An object or array is stored as JSON text in its cell***, and read back as the object or array.
+- ***A field holding `null` reads back absent***, because an empty cell cannot tell the two apart.
+- A `Path` ending in `.csv` is written as CSV, which holds one worksheet.
+- Use it to share a collection with someone who works in Excel.
 
 Storage Interface
 ---------------------------------------------------------------------
